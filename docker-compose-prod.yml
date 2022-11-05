@@ -1,0 +1,25 @@
+version: "3.9"
+services:
+  server:
+    build:
+      context: .
+      dockerfile: server.Dockerfile
+    restart: always
+    environment:
+      - DB_URL=postgresql://admin:123456@database:5432/bank_db
+      - GIN_MODE=release
+    ports:
+      - "8080:8080"
+  database:
+    build:
+      context: .
+      dockerfile: db.Dockerfile
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_USER=admin
+      - POSTGRES_DB=bank_db
+    volumes:
+      - db_volume:/var/lib/postgresql/data
+volumes:
+  db_volume:

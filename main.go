@@ -2,47 +2,34 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"net/http"
+	"log"
 	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type client struct {
-	id      int32
-	name    string
-	balance int32
+type appContext struct {
+	dbpool *pgxpool.Pool
 }
 
 func main() {
-	fmt.Println(os.Getenv("DB_URL"))
+	ctx := appContext{}
+	var err error
 
-	dbpool, err := pgxpool.New(context.Background(), os.Getenv("DB_URL"))
+	ctx.dbpool, err = pgxpool.New(context.Background(), os.Getenv("DB_URL"))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to create connection pool: %v\n", err)
-		os.Exit(1)
+		log.Fatalf("Unable to create connection pool: %v\n", err)
 	}
-	defer dbpool.Close()
+	defer ctx.dbpool.Close()
 
 	router := gin.Default()
-	router.GET("/client/:id", getClientInfo)
-	router.PATCH("/balance/:id", updateClientBalance)
-	router.Run(os.Getenv("SERVER_URL"))
-}
+	router.GET("/client/:id", wrappContext(&ctx, routeGetClientInfo))
+	router.POST("/operation/:id", wrappContext(&ctx, routeCreateOperation))
+	router.POST("/client", wrappContext(&ctx, routeCreateNewClient))
 
-func getClientInfo(c *gin.Context) {
-	id := c.Param("id")
-
-	fmt.Println("Get", id)
-
-	c.IndentedJSON(http.StatusOK, gin.H{"Hello": "World"})
-}
-
-func updateClientBalance(c *gin.Context) {
-	id := c.Param("id")
-	fmt.Println("Update", id)
-
-	c.IndentedJSON(http.StatusOK, gin.H{})
+	err = router.Run()
+	if err != nil {
+		log.Fatalf("Unable to start http server: %v\n", err)
+	}
 }
