@@ -55,6 +55,7 @@ func routeCreateNewClient(c *gin.Context, ctx *appContext) {
 	c.IndentedJSON(http.StatusOK, gin.H{"id": id, "balance": balance, name: "name"})
 }
 
+// Не используется. В последней версии баланс считается лениво, все изменения баланса сохраняются в базу данных.
 func updateClientBalance(c *gin.Context, ctx *appContext) {
 	log.Printf("Update client balance")
 
