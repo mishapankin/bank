@@ -45,3 +45,6 @@ docker compose build database --no-cache
 ## Сеть
 В релизной версии к базе данных доступ имеет только контейнер с сервером, но снаружи
 доступа к бд нет.
+
+## Api
+[Супер краткое описание апи](https://documenter.getpostman.com/view/23086966/2s8YYFsizs)
